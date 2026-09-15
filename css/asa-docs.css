@@ -365,6 +365,7 @@
 .asa-doc-card {
   background: var(--asa-bg-elevated);
   border: var(--asa-border-width) solid var(--asa-line);
+  color: var(--asa-ink);
   padding: clamp(20px, 2.6vw, 34px);
   display: flex;
   flex-direction: column;
@@ -389,9 +390,32 @@
 .asa-doc-card--dense a:hover {
   color: var(--asa-surface);
 }
-.asa-doc-card--yellow { background: var(--asa-surface); border-color: transparent; }
-.asa-doc-card--cream  { background: var(--asa-bg); }
+.asa-doc-card--yellow { background: var(--asa-surface); border-color: transparent; color: var(--asa-ink) !important; }
+.asa-doc-card--cream  { background: var(--asa-bg); color: var(--asa-ink); }
 .asa-doc-card--flush  { padding: 0; overflow: hidden; }
+
+/* Em seções dense, garante que cards claros/amarelos não herdem texto branco nem títulos amarelos */
+.asa-doc-section--dense .asa-doc-card:not(.asa-doc-card--dense) {
+  color: var(--asa-ink);
+}
+.asa-doc-section--dense .asa-doc-card:not(.asa-doc-card--dense) .asa-doc-block__title {
+  color: var(--asa-action-hover);
+}
+.asa-doc-section--dense .asa-doc-card--yellow .asa-doc-block__title {
+  color: var(--asa-ink) !important;
+}
+.asa-doc-section--dense .asa-doc-card:not(.asa-doc-card--dense) .asa-doc-spec span {
+  color: var(--asa-ink);
+}
+.asa-doc-section--dense .asa-doc-card--yellow .asa-doc-spec span {
+  color: var(--asa-ink);
+}
+.asa-doc-section--dense .asa-doc-card--yellow .asa-doc-spec__value {
+  color: #3A2C08 !important;
+}
+.asa-doc-section--dense .asa-doc-card:not(.asa-doc-card--dense) .asa-doc-spec__value {
+  color: var(--asa-ink-2);
+}
 
 /* A glosa gruda na base do card. É o que alinha o racional entre cards de
    alturas diferentes na mesma linha. Ajustado para 15px com --asa-ink-2 para
