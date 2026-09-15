@@ -1,0 +1,2951 @@
+/* ==========================================================================
+   ASA RENT A CAR — COMPONENTES
+
+   Nomenclatura: BEM com prefixo asa-.
+   Estados de runtime NÃO viram classe modificadora — usam o atributo nativo
+   (:disabled, [aria-invalid], [data-state], [aria-current]). É o que o
+   framework já emite, e vem com acessibilidade junto.
+
+   Carregar depois de asa-base.css e antes de asa-utilities.css.
+   ========================================================================== */
+
+/* ==========================================================================
+   BOTÃO
+
+   REGRA DURA: um único botão vermelho por peça. É o único elemento que
+   carrega cor cheia numa peça amarela. Se a tela tem dois botões vermelhos,
+   nenhum deles comunica prioridade — e o orçamento de 20% de vermelho estoura.
+   ========================================================================== */
+
+.asa-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--asa-space-2);
+  min-height: var(--asa-touch-min);
+  padding: 15px 22px;
+  border: none;
+  border-radius: var(--asa-radius);
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  line-height: 1;
+  font-weight: var(--asa-weight-bold);
+  text-align: center;
+  cursor: pointer;
+  transition: background-color var(--asa-dur-fast) var(--asa-ease),
+              color var(--asa-dur-fast) var(--asa-ease);
+}
+
+.asa-btn--primary {
+  background: var(--asa-action);
+  color: var(--asa-on-action);
+}
+
+.asa-btn--primary:hover:not(:disabled) {
+  background: var(--asa-action-hover);
+  color: var(--asa-on-action);
+}
+
+/* Amarelo. Usado para WhatsApp e ações de suporte — nunca para a ação
+   principal, que é sempre a vermelha. */
+.asa-btn--secondary {
+  background: var(--asa-surface);
+  color: var(--asa-ink);
+}
+
+.asa-btn--secondary:hover:not(:disabled) {
+  background: var(--asa-yellow-hover);
+  color: var(--asa-ink);
+}
+
+/* Terciário: só contorno. Para "voltar", "cancelar" e ações de saída. */
+.asa-btn--outline {
+  background: transparent;
+  color: var(--asa-ink);
+  border: var(--asa-border-width) solid var(--asa-line);
+}
+
+.asa-btn--outline:hover:not(:disabled) {
+  border-color: var(--asa-ink);
+  color: var(--asa-ink);
+}
+
+.asa-btn--block { display: flex; width: 100%; }
+
+/* Terciário sem contorno nenhum: ação de apoio dentro de um bloco de texto
+   (ver mais, editar). Vermelho aqui espalharia a cor por um site de 70
+   páginas — usa --asa-ink e só sublinha para não perder a affordance. */
+.asa-btn--link {
+  display: inline-flex;
+  min-height: auto;
+  padding: 0;
+  background: transparent;
+  color: var(--asa-ink);
+  font-size: var(--asa-fs-body-dense);
+  font-weight: var(--asa-weight-medium);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.asa-btn--link:hover:not(:disabled) { color: var(--asa-action-hover); }
+
+/* Quadrado, só ícone: fechar modal, dispensar barra, favoritar, navegar
+   prateleira. 44px é o alvo de toque mínimo, não um valor arbitrário. */
+.asa-btn--icon {
+  width: var(--asa-touch-min);
+  height: var(--asa-touch-min);
+  padding: 0;
+  flex: none;
+}
+
+/* Compacto, para o rodapé do card de veículo. Encolhe o texto e o padding
+   lateral — nunca a altura: o alvo de toque continua em 44px. */
+.asa-btn--sm {
+  padding: 11px 14px;
+  font-size: 12px;
+}
+
+/* Desabilitado usa token literal, nunca opacity: a marca proíbe texto com
+   alpha, e opacity num nó de texto é exatamente isso. */
+.asa-btn:disabled {
+  background: var(--asa-disabled-bg);
+  color: var(--asa-disabled-text);
+  border-color: transparent;
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   BOTÃO CARREGANDO
+   Não é detalhe estético: um botão que não muda durante uma requisição
+   convida o segundo clique — e o segundo clique aqui é uma segunda cobrança
+   de caução no cartão.
+   O sistema proíbe rotação, então nada de spinner. Três pontos em fade, cada
+   um com 400ms (o teto do sistema), defasados para formar a onda.
+   -------------------------------------------------------------------------- */
+
+.asa-btn[data-state="loading"] {
+  pointer-events: none;
+}
+
+.asa-btn[data-state="loading"] .asa-btn__label {
+  display: none;
+}
+
+.asa-btn__loader {
+  display: none;
+  align-items: center;
+  gap: 5px;
+}
+
+.asa-btn[data-state="loading"] .asa-btn__loader {
+  display: inline-flex;
+}
+
+.asa-btn__loader span {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--asa-radius-full);
+  background: currentColor;
+  animation: asa-dot var(--asa-dur-max) var(--asa-ease) infinite alternate;
+}
+
+.asa-btn__loader span:nth-child(2) { animation-delay: 130ms; }
+.asa-btn__loader span:nth-child(3) { animation-delay: 260ms; }
+
+@keyframes asa-dot {
+  from { opacity: .25; }
+  to   { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .asa-btn__loader span { animation: none; opacity: .6; }
+}
+
+/* ==========================================================================
+   ETIQUETA DE BENEFÍCIO
+   Sem radius — é o único componente retangular do sistema, e é isso que a
+   separa de um botão à primeira vista.
+
+   T1 (10/09/2026): a etiqueta nasce vermelha, e numa vitrine de 32 cards
+   isso soma um segundo vermelho ao lado do preço — o sinal deixa de ser
+   raro. --outline vira o padrão de prova social ("Preferido do público");
+   vermelho cheio fica reservado para o que ainda é ação (--ok, --ink já
+   cobriam estado; --warn cobre atenção, ver Lacuna 2).
+   ========================================================================== */
+
+.asa-tag {
+  display: inline-block;
+  padding: 7px 10px;
+  background: var(--asa-action);
+  color: var(--asa-on-action);
+  font-size: var(--asa-fs-label);
+  line-height: 1;
+  font-weight: var(--asa-weight-medium);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.asa-tag--ok      { background: var(--asa-ok); }
+.asa-tag--ink     { background: var(--asa-ink); color: var(--asa-ink-inverse); }
+.asa-tag--warn    { background: var(--asa-warn-bg); color: var(--asa-warn); }
+.asa-tag--outline {
+  background: transparent;
+  color: var(--asa-ink);
+  border: var(--asa-border-width) solid var(--asa-line);
+  padding: 6px 9px;   /* compensa a borda: mantém a mesma caixa externa da sólida */
+}
+.asa-tag--neutral { background: var(--asa-disabled-bg); color: var(--asa-ink-2); }
+
+/* ==========================================================================
+   PREÇO
+   A única ocasião em que vermelho e amarelo se encostam em texto — e só
+   neste corpo. O valor é grande e negrito o bastante para o contraste de
+   4,39:1 do vermelho sobre creme atender ao mínimo de texto grande do WCAG.
+   ========================================================================== */
+
+.asa-price {
+  display: flex;
+  flex-direction: column;
+  gap: var(--asa-space-1);
+}
+
+.asa-price__label {
+  font-size: var(--asa-fs-label);
+  line-height: 1.2;
+  font-weight: var(--asa-weight-regular);
+  color: var(--asa-ink);
+}
+
+.asa-price__value {
+  font-size: clamp(38px, 4.4vw, 58px);
+  line-height: .9;
+  font-weight: var(--asa-weight-black);
+  font-style: italic;
+  letter-spacing: var(--asa-tracking-price);
+  color: var(--asa-action);
+}
+
+.asa-price__note {
+  font-size: var(--asa-fs-label);
+  line-height: 1.4;
+  font-weight: var(--asa-weight-regular);
+  color: var(--asa-ink);
+}
+
+/* Estrutura de 5 partes (10/09/2026, ver extensões em MAPA-COMPONENTES §4):
+   __value continua o total do período, primário. __daily é a diária,
+   secundária — nunca do mesmo tamanho do total, ou o "preço final" perde
+   a corrida contra a diária. __installment e __pix são opcionais. */
+.asa-price__daily {
+  font-size: var(--asa-fs-body-dense);
+  line-height: 1.3;
+  font-weight: var(--asa-weight-medium);
+  color: var(--asa-ink-2);
+}
+
+.asa-price__installment {
+  font-size: var(--asa-fs-label);
+  line-height: 1.4;
+  color: var(--asa-ink-3);
+}
+
+/* Pix é turquesa por manual de marca próprio — T11: cor de terceiro isolada
+   neste selo, nunca solta no resto do componente. */
+.asa-price__pix {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  padding: 2px 8px;
+  border-radius: var(--asa-radius);
+  background: #E6F9F6;
+  font-size: var(--asa-fs-label);
+  font-weight: var(--asa-weight-medium);
+  color: #0F7A6E;
+}
+
+/* ==========================================================================
+   PLACA DE NÚMERO — prova social
+   O componente mais usado do sistema. Números canônicos: 4,7 (Google) e
+   9,4 (Reclame Aqui). Sempre em vírgula decimal, formato pt-BR, e sempre
+   inteiros de uma vez — nunca contador animado, que remete a dashboard de
+   software e não a reputação de gente.
+   ========================================================================== */
+
+.asa-numberplate {
+  display: flex;
+  flex-direction: column;
+  gap: var(--asa-space-3);
+  padding: clamp(20px, 2.6vw, 32px);
+  background: var(--asa-bg-dense);
+}
+
+.asa-numberplate__value {
+  font-size: clamp(58px, 8vw, 104px);
+  line-height: .8;
+  font-weight: var(--asa-weight-black);
+  font-style: italic;
+  letter-spacing: var(--asa-tracking-number);
+  color: var(--asa-surface);
+}
+
+.asa-numberplate__source {
+  font-size: clamp(14px, 1.4vw, 17px);
+  line-height: 1.3;
+  color: var(--asa-ink-inverse);
+  max-width: none;
+}
+
+/* ==========================================================================
+   CARD
+   Elevação sem sombra: borda de 1.5px e contraste de fundo. É a única
+   forma permitida.
+   ========================================================================== */
+
+.asa-card {
+  background: var(--asa-bg-elevated);
+  border: var(--asa-border-width) solid var(--asa-line);
+  border-radius: var(--asa-radius);
+  overflow: hidden;
+}
+
+.asa-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--asa-space-2);
+  padding: 14px;
+}
+
+/* --------------------------------------------------------------------------
+   CARD DE VEÍCULO
+   O título fala da viagem, não da ficha técnica: "Ideal para Jericoacoara e
+   Canoa Quebrada", não "1.6 16V flex".
+   -------------------------------------------------------------------------- */
+
+.asa-card-vehicle { position: relative; }
+
+/* Selo de prova social sobre a mídia. T1 decidiu --outline, não vermelho —
+   ver 06-componentes.html#flutuante... na verdade ver a etiqueta acima. */
+.asa-card-vehicle__badge {
+  position: absolute;
+  top: var(--asa-space-3);
+  left: var(--asa-space-3);
+  z-index: 1;
+}
+
+/* Política de cancelamento — texto, não ícone colorido: é informação de
+   apoio, não um selo que disputa atenção com o preço. */
+.asa-card-vehicle__policy {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-label);
+  color: var(--asa-ink-3);
+}
+
+.asa-card-vehicle__policy .asa-icon { width: 14px; height: 14px; color: var(--asa-ok); }
+
+/* Rodapé com dois CTAs (§6.3): a ação secundária ("Ver detalhes") nunca
+   compete em peso com a primária — outline sempre, e a primária segue a
+   lei de precedência de T1 (cheia só na tela de instância única). */
+.asa-card-vehicle__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--asa-space-2);
+}
+
+/* Esgotado nesta data (§5.2, mantido por decisão): a mídia ganha um véu
+   claro com a mensagem, e o CTA principal é trocado por disabled no
+   markup — nunca por opacity solta, que a marca proíbe em nó de texto. */
+.asa-card-vehicle__soldout {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, .82);
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  font-weight: var(--asa-weight-bold);
+  color: var(--asa-ink);
+  text-align: center;
+}
+
+.asa-card-vehicle[data-state="soldout"] .asa-card-vehicle__soldout { display: flex; }
+
+/* Variante horizontal — página de resultados, onde o card divide a linha
+   com o resumo em vez de competir por largura numa grade. */
+.asa-card-vehicle--horizontal {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+}
+
+.asa-card-vehicle--horizontal .asa-cut,
+.asa-card-vehicle--horizontal .asa-photo { height: 100%; }
+
+@media (max-width: 639px) {
+  .asa-card-vehicle--horizontal { grid-template-columns: 1fr; }
+}
+
+/* T1 (10/09/2026): era --asa-action-hover — um terceiro vermelho no card,
+   ao lado do preço e do CTA. É metadado de classificação, não ação. */
+.asa-card-vehicle__category {
+  font-family: var(--asa-font-mono);
+  font-size: var(--asa-fs-label);
+  line-height: 1;
+  font-weight: var(--asa-weight-medium);
+  letter-spacing: var(--asa-tracking-mono);
+  text-transform: uppercase;
+  color: var(--asa-ink-3);
+}
+
+.asa-card-vehicle__title {
+  font-size: var(--asa-fs-subtitle);
+  line-height: 1.2;
+  font-weight: var(--asa-weight-bold);
+  color: var(--asa-ink);
+  margin: 0;
+}
+
+.asa-card-vehicle__specs {
+  font-size: var(--asa-fs-body-dense);
+  line-height: 1.45;
+  color: var(--asa-ink-3);
+  margin: 0;
+  max-width: none;
+}
+
+.asa-card-vehicle__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--asa-space-3);
+  border-top: 1px solid var(--asa-line-soft);
+  padding-top: 10px;
+  margin-top: var(--asa-space-1);
+}
+
+.asa-card-vehicle__price {
+  font-size: var(--asa-fs-price-card);
+  line-height: 1;
+  font-weight: var(--asa-weight-black);
+  font-style: italic;
+  letter-spacing: var(--asa-tracking-display);
+  color: var(--asa-action);
+}
+
+/* ==========================================================================
+   ÍCONE DE PERFIL
+   Único uso de vermelho cheio preservado da v3.1: é o que garante
+   reconhecimento no círculo de 40px da busca do Google.
+   ========================================================================== */
+
+.asa-avatar {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  width: 64px;
+  border-radius: var(--asa-radius-full);
+  background: var(--asa-action) url('../assets/img/w-atual-branco.png') center / 66% no-repeat;
+}
+
+.asa-avatar--on-cover {
+  border: 4px solid var(--asa-white);
+}
+
+/* ==========================================================================
+   ÍCONE
+   Biblioteca única (Feather), traço de 1.5px — a mesma espessura da borda
+   de card, para que ícone e componente compartilhem a linha do sistema.
+   ========================================================================== */
+
+.asa-icon {
+  width: var(--asa-icon-inline);
+  height: var(--asa-icon-inline);
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: var(--asa-icon-stroke);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.asa-icon--feature {
+  width: var(--asa-icon-feature);
+  height: var(--asa-icon-feature);
+}
+
+/* ==========================================================================
+   CAMPO DE FORMULÁRIO
+
+   Variante outline (borda visível sobre branco), não fill: o checkout tem
+   mais de doze campos, e caixas preenchidas em sequência cansam a vista.
+
+   NOTA DE DIVERGÊNCIA DO HANDOFF: o handoff especifica o label do campo em
+   9px. A regra dura do mesmo documento diz que nenhum texto fica abaixo de
+   12px em tela, e a escala tem cinco degraus "nada entre eles" — o degrau
+   Etiqueta (12px/500/caixa alta) existe exatamente para este papel. A regra
+   geral prevalece sobre a spec do componente: label a 12px.
+   ========================================================================== */
+
+.asa-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.asa-field__label {
+  font-size: var(--asa-fs-label);
+  line-height: 1.2;
+  font-weight: var(--asa-weight-medium);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--asa-ink-3);
+}
+
+.asa-field__control,
+.asa-input,
+.asa-select {
+  width: 100%;
+  min-height: var(--asa-control-h);
+  padding: 14px;
+  background: var(--asa-bg-elevated);
+  border: var(--asa-border-width) solid var(--asa-line);
+  border-radius: var(--asa-radius);
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  line-height: 1.2;
+  font-weight: var(--asa-weight-medium);
+  color: var(--asa-ink);
+  transition: border-color var(--asa-dur-fast) var(--asa-ease);
+}
+
+.asa-input::placeholder {
+  color: var(--asa-ink-3);
+  font-weight: var(--asa-weight-regular);
+}
+
+.asa-input:hover:not(:disabled):not([aria-invalid="true"]) {
+  border-color: rgba(20, 21, 23, .3);
+}
+
+.asa-input:focus,
+.asa-select:focus {
+  border-color: var(--asa-action-hover);
+  outline: 2px solid var(--asa-action-hover);
+  outline-offset: 2px;
+}
+
+/* Preenchido: o valor em peso 500 já distingue de vazio (placeholder em 400).
+   A borda escurece um passo para marcar que o campo tem conteúdo. */
+.asa-input:not(:placeholder-shown) {
+  border-color: rgba(20, 21, 23, .28);
+}
+
+/* Erro NÃO pode depender só da cor da borda: o foco usa exatamente a mesma
+   cor (--asa-action-hover, logo acima), então num campo focado E inválido —
+   que é o estado normal de quem acabou de errar e voltou para corrigir — o
+   sinal de erro sumiria. A paleta é fechada e não tem canal de atenção, então
+   o segundo canal é a ESPESSURA: 2px contra os 1.5px de todos os outros
+   estados. O sinal primário continua sendo a mensagem .asa-field__error, com
+   ícone, ligada por aria-describedby.
+   É o mesmo princípio de redundância de sinais que o botão primário já usa
+   (cor + isolamento + posição) — ver 07-hierarquia.html. */
+.asa-input[aria-invalid="true"],
+.asa-select[aria-invalid="true"] {
+  border-color: var(--asa-action-hover);
+  border-width: 2px;
+}
+
+.asa-input:disabled,
+.asa-select:disabled {
+  background: var(--asa-disabled-bg);
+  border-color: transparent;
+  color: var(--asa-disabled-text);
+  cursor: not-allowed;
+}
+
+/* Ajuda persistente: fica visível mesmo com o campo preenchido. Tudo que a
+   pessoa precisa consultar ENQUANTO preenche não pode viver no placeholder,
+   que some no primeiro caractere digitado. */
+.asa-field__help {
+  font-size: var(--asa-fs-label);
+  line-height: 1.4;
+  color: var(--asa-ink-3);
+  max-width: none;
+}
+
+/* Erro colado ao campo que falhou — nunca num banner genérico no topo do
+   formulário: no momento do erro a atenção já está neste campo. */
+.asa-field__error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--asa-fs-label);
+  line-height: 1.4;
+  font-weight: var(--asa-weight-medium);
+  color: var(--asa-action-hover);
+  max-width: none;
+}
+
+.asa-field__error .asa-icon { width: 14px; height: 14px; }
+
+/* Campo com adorno à direita (bandeira do cartão, ícone de calendário).
+   O adorno é decorativo e não recebe foco. */
+.asa-field--adorned { position: relative; }
+
+.asa-field--adorned .asa-input { padding-right: 56px; }
+
+.asa-field__adornment {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+  color: var(--asa-ink-3);
+}
+
+/* Par validade + CVV lado a lado: espelha o layout físico do cartão e reduz
+   o esforço de tradução mental de quem está com ele na mão. */
+.asa-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--asa-space-3);
+}
+
+.asa-fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: var(--asa-space-4);
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+/* ==========================================================================
+   SELEÇÃO — radio, checkbox, switch
+
+   Radio: uma opção entre várias mutuamente exclusivas (forma de pagamento).
+   Checkbox: opções independentes, de zero a todas (consentimento).
+   Switch: configuração binária que vale na hora, sem passo de salvar.
+
+   O estado marcado usa PRETO, não vermelho. O vermelho é o orçamento da
+   ação principal da tela; um formulário com cinco caixas marcadas em
+   vermelho faria a marca perder a assinatura e o CTA perder a prioridade.
+   ========================================================================== */
+
+.asa-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--asa-space-3);
+  min-height: var(--asa-touch-min);
+  padding: 10px 0;
+  cursor: pointer;
+}
+
+.asa-choice__input {
+  appearance: none;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  background: var(--asa-bg-elevated);
+  border: var(--asa-border-width) solid var(--asa-line);
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+  transition: border-color var(--asa-dur-fast) var(--asa-ease),
+              background-color var(--asa-dur-fast) var(--asa-ease);
+}
+
+.asa-choice__input[type="checkbox"] { border-radius: var(--asa-radius); }
+.asa-choice__input[type="radio"]    { border-radius: var(--asa-radius-full); }
+
+.asa-choice__input:hover:not(:disabled) { border-color: var(--asa-ink); }
+
+.asa-choice__input[type="checkbox"]:checked {
+  background: var(--asa-ink);
+  border-color: var(--asa-ink);
+}
+
+.asa-choice__input[type="checkbox"]:checked::after {
+  content: "";
+  width: 10px;
+  height: 6px;
+  border-left: 2px solid var(--asa-white);
+  border-bottom: 2px solid var(--asa-white);
+  transform: rotate(-45deg) translate(1px, -1px);
+}
+
+.asa-choice__input[type="radio"]:checked {
+  border-color: var(--asa-ink);
+  border-width: 6px;
+}
+
+.asa-choice__input:disabled {
+  background: var(--asa-disabled-bg);
+  border-color: var(--asa-disabled-bg);
+  cursor: not-allowed;
+}
+
+.asa-choice__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.asa-choice__title {
+  font-size: var(--asa-fs-body-dense);
+  line-height: 1.35;
+  font-weight: var(--asa-weight-medium);
+  color: var(--asa-ink);
+}
+
+.asa-choice__note {
+  font-size: var(--asa-fs-label);
+  line-height: 1.45;
+  color: var(--asa-ink-3);
+  max-width: none;
+}
+
+/* Consentimento opcional não deve competir visualmente com o obrigatório —
+   pesos diferentes deixam claro que não são a mesma decisão. */
+.asa-choice--optional .asa-choice__title { font-weight: var(--asa-weight-regular); }
+
+/* Bloco selecionável, com preço à direita — proteções, meios de pagamento,
+   adicionais (etapas 3 e 4 do funil). Estado marcado é a borda inteira,
+   não só o quadrado de 20px: numa lista de 4-5 opções em sequência, um
+   check pequeno se perde; a borda inteira não. */
+.asa-choice--card {
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: auto;
+  padding: var(--asa-space-3) var(--asa-space-4);
+  border: var(--asa-border-width) solid var(--asa-line);
+  border-radius: var(--asa-radius);
+  transition: border-color var(--asa-dur-fast) var(--asa-ease);
+}
+
+.asa-choice--card:has(.asa-choice__input:checked) {
+  border-color: var(--asa-ink);
+  border-width: 2px;
+}
+
+.asa-choice--card .asa-choice__price {
+  margin-left: auto;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  font-weight: var(--asa-weight-bold);
+  color: var(--asa-ink);
+  white-space: nowrap;
+}
+
+.asa-switch__input {
+  appearance: none;
+  flex: none;
+  width: 44px;
+  height: 24px;
+  margin: 0;
+  border-radius: 12px;
+  background: var(--asa-disabled-bg);
+  border: var(--asa-border-width) solid var(--asa-line);
+  position: relative;
+  cursor: pointer;
+  transition: background-color var(--asa-dur-fast) var(--asa-ease);
+}
+
+.asa-switch__input::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 17px;
+  height: 17px;
+  border-radius: var(--asa-radius-full);
+  background: var(--asa-white);
+  border: 1px solid var(--asa-line);
+  transition: transform var(--asa-dur-fast) var(--asa-ease);
+}
+
+.asa-switch__input:checked {
+  background: var(--asa-ink);
+  border-color: var(--asa-ink);
+}
+
+.asa-switch__input:checked::after {
+  transform: translateX(20px);
+  border-color: transparent;
+}
+
+/* ==========================================================================
+   STEPPER
+   Um formulário longo dividido em etapas reduz o esforço percebido, e o
+   indicador comunica que existe um fim conhecido — a incerteza de "quanto
+   ainda falta" é uma das maiores causas de abandono.
+   ========================================================================== */
+
+.asa-stepper {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--asa-space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.asa-stepper__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 2px solid var(--asa-line);
+  font-size: var(--asa-fs-label);
+  line-height: 1.3;
+  color: var(--asa-ink-3);
+}
+
+.asa-stepper__item[data-state="done"] {
+  border-top-color: var(--asa-ok);
+  color: var(--asa-ok);
+}
+
+.asa-stepper__item[aria-current="step"] {
+  border-top-color: var(--asa-ink);
+  color: var(--asa-ink);
+  font-weight: var(--asa-weight-medium);
+}
+
+.asa-stepper__index {
+  font-family: var(--asa-font-mono);
+  font-size: var(--asa-fs-label);
+  letter-spacing: var(--asa-tracking-mono);
+  text-transform: uppercase;
+}
+
+.asa-stepper__label {
+  font-size: var(--asa-fs-body-dense);
+  line-height: 1.25;
+  font-weight: inherit;
+}
+
+/* ==========================================================================
+   BUSCA DE VEÍCULO
+   O componente central de uma locadora: local e datas de retirada e
+   devolução. Fica sobre branco, dentro do campo claro do vão.
+
+   Extensão (10/09/2026, ver MAPA-COMPONENTES §4): o grid de 4 colunas
+   original só sobrevivia a três campos e um botão. O motor completo do
+   estudo tem 7 controles — abas de linha de negócio, local com
+   autocomplete, dois pares data+hora, chips secundários e "Minha reserva".
+   __row herda o grid antigo; __tabs, __chips e __aside são novos. Quem só
+   precisa dos 3 campos simples continua funcionando — basta usar __row
+   sozinho dentro de .asa-search, como nos exemplos deste arquivo.
+   ========================================================================== */
+
+.asa-search {
+  display: flex;
+  flex-direction: column;
+  gap: var(--asa-space-3);
+  padding: var(--asa-space-4);
+  background: var(--asa-bg-elevated);
+  border-radius: var(--asa-radius);
+}
+
+.asa-search__tabs {
+  display: flex;
+  gap: var(--asa-space-1);
+}
+
+.asa-search__tab {
+  padding: 10px var(--asa-space-4);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  font-weight: var(--asa-weight-medium);
+  color: var(--asa-ink-3);
+  cursor: pointer;
+}
+
+.asa-search__tab[aria-selected="true"] {
+  color: var(--asa-ink);
+  border-bottom-color: var(--asa-action);
+}
+
+.asa-search__row {
+  display: grid;
+  gap: var(--asa-space-3);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .asa-search__row {
+    grid-template-columns: 1.4fr 1fr 1fr auto;
+    align-items: end;
+  }
+}
+
+.asa-search__row .asa-btn { min-height: var(--asa-control-h); }
+
+.asa-search__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--asa-space-2);
+}
+
+.asa-search__aside {
+  padding-top: var(--asa-space-3);
+  border-top: var(--asa-border-width) solid var(--asa-line-soft);
+}
+
+/* --------------------------------------------------------------------------
+   COMBOBOX — local com autocomplete, quatro tipos de lugar (aeroporto,
+   cidade, bairro, destino) mais o código IATA. A lista mora dentro de um
+   .asa-popover já existente; aqui só o conteúdo.
+   -------------------------------------------------------------------------- */
+.asa-combobox { position: relative; }
+
+.asa-combobox__list {
+  list-style: none;
+  margin: 0;
+  padding: var(--asa-space-1) 0;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.asa-combobox__option {
+  display: flex;
+  align-items: center;
+  gap: var(--asa-space-2);
+  min-height: var(--asa-touch-min);
+  padding: 0 var(--asa-space-3);
+  border-radius: var(--asa-radius);
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  color: var(--asa-ink);
+  cursor: pointer;
+}
+
+.asa-combobox__option:hover,
+.asa-combobox__option[aria-selected="true"] {
+  background: var(--asa-surface-hover);
+}
+
+.asa-combobox__option-type {
+  flex: none;
+  width: var(--asa-icon-dense);
+  height: var(--asa-icon-dense);
+  color: var(--asa-ink-3);
+}
+
+.asa-combobox__label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.asa-combobox__name {
+  font-weight: var(--asa-weight-medium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.asa-combobox__hint {
+  font-size: var(--asa-fs-label);
+  color: var(--asa-ink-3);
+}
+
+.asa-combobox__iata {
+  margin-left: auto;
+  flex: none;
+  font-family: var(--asa-font-mono);
+  font-size: var(--asa-fs-label);
+  letter-spacing: var(--asa-tracking-mono);
+  color: var(--asa-ink-3);
+}
+
+.asa-combobox__empty {
+  padding: var(--asa-space-5) var(--asa-space-3);
+  text-align: center;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  color: var(--asa-ink-3);
+}
+
+/* --------------------------------------------------------------------------
+   DATEPICKER — calendário de intervalo dentro de um .asa-popover. A diária
+   de 27h só é vendável se a hora entrar na busca — ver .asa-timeselect,
+   sempre ao lado, nunca sozinho.
+   -------------------------------------------------------------------------- */
+.asa-datepicker__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--asa-space-3);
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  font-weight: var(--asa-weight-bold);
+  color: var(--asa-ink);
+}
+
+.asa-datepicker__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.asa-datepicker__weekday {
+  padding: 4px 0;
+  text-align: center;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-label);
+  color: var(--asa-ink-3);
+}
+
+.asa-datepicker__day {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: var(--asa-radius);
+  background: none;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  color: var(--asa-ink);
+  cursor: pointer;
+}
+
+.asa-datepicker__day:hover:not(:disabled) { background: var(--asa-surface-hover); }
+
+/* Intervalo selecionado: o miolo usa a mesma opacidade baixíssima de
+   --asa-surface-selected (Lacuna 3) que o menu usa para item marcado —
+   consistência de linguagem entre as duas superfícies flutuantes. */
+.asa-datepicker__day[data-state="in-range"] { background: var(--asa-surface-selected); }
+
+.asa-datepicker__day[data-state="start"],
+.asa-datepicker__day[data-state="end"] {
+  background: var(--asa-ink);
+  color: var(--asa-ink-inverse);
+}
+
+.asa-datepicker__day:disabled {
+  color: var(--asa-disabled-text);
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------------------
+   TIMESELECT — select nativo, sem popover próprio: a lista de horários é
+   curta e estática, e o nativo já resolve teclado e leitor de tela sem
+   reimplementar nada.
+   -------------------------------------------------------------------------- */
+.asa-timeselect {
+  width: 100%;
+  min-height: var(--asa-control-h);
+  padding: 0 var(--asa-space-3);
+  background: var(--asa-bg-elevated);
+  border: var(--asa-border-width) solid var(--asa-line);
+  border-radius: var(--asa-radius);
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  color: var(--asa-ink);
+}
+
+/* --------------------------------------------------------------------------
+   CHIP — quatro usos do estudo: secundário do motor (idade, país da CNH,
+   cupom), de intenção, de sazonalidade e de filtro rápido da vitrine.
+   Radius 8px, nunca pill — a regra de forma da marca não abre exceção
+   para chip (ver FORMA em asa-tokens.css: "nada mais é arredondado").
+   -------------------------------------------------------------------------- */
+.asa-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--asa-touch-min);
+  padding: 0 14px;
+  background: var(--asa-bg-elevated);
+  border: var(--asa-border-width) solid var(--asa-line);
+  border-radius: var(--asa-radius);
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  color: var(--asa-ink);
+  cursor: pointer;
+  transition: background-color var(--asa-dur-fast) var(--asa-ease),
+              border-color var(--asa-dur-fast) var(--asa-ease),
+              color var(--asa-dur-fast) var(--asa-ease);
+}
+
+.asa-chip:hover:not(:disabled) { border-color: var(--asa-ink); }
+
+.asa-chip[aria-pressed="true"] {
+  background: var(--asa-ink);
+  border-color: var(--asa-ink);
+  color: var(--asa-ink-inverse);
+}
+
+.asa-chip:disabled {
+  color: var(--asa-disabled-text);
+  border-color: var(--asa-disabled-bg);
+  cursor: not-allowed;
+}
+
+.asa-chip__icon { width: 14px; height: 14px; }
+
+/* --------------------------------------------------------------------------
+   BOOKING LOOKUP — MUST #2: o mesmo bloco em três lugares — dentro de um
+   popover no header, no widget da home e em /minha-reserva. --plain tira
+   a moldura própria para os contextos que já têm uma (o popover, o cartão
+   da tela) por baixo.
+   -------------------------------------------------------------------------- */
+.asa-booking-lookup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--asa-space-3);
+  padding: var(--asa-space-4);
+  background: var(--asa-bg-elevated);
+  border: var(--asa-border-width) solid var(--asa-line);
+  border-radius: var(--asa-radius);
+}
+
+.asa-booking-lookup--plain {
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+.asa-booking-lookup__title {
+  margin: 0;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  font-weight: var(--asa-weight-bold);
+  color: var(--asa-ink);
+}
+
+.asa-booking-lookup__row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--asa-space-3);
+}
+
+@media (min-width: 560px) {
+  .asa-booking-lookup__row {
+    flex-direction: row;
+    align-items: end;
+  }
+  .asa-booking-lookup__row .asa-field { flex: 1; }
+}
+
+/* ==========================================================================
+   ALERTA
+   Sem sombra e sem ícone colorido de fundo: borda de 1.5px e um rótulo mono.
+
+   --warn (Lacuna 2, 10/09/2026): antes disto, "esgotado", "documento
+   recusado" e "campo inválido" competiam todos pelo mesmo vermelho que é o
+   orçamento do CTA. Usar --warn explica a caução com valor exato antes de
+   pedir o cartão — é atenção, não é erro nem é ação.
+   ========================================================================== */
+
+.asa-alert {
+  display: flex;
+  gap: var(--asa-space-3);
+  padding: var(--asa-space-4);
+  background: var(--asa-bg-elevated);
+  border: var(--asa-border-width) solid var(--asa-line);
+  border-left-width: 4px;
+  border-radius: var(--asa-radius);
+}
+
+.asa-alert--ok    { border-left-color: var(--asa-ok); }
+.asa-alert--error { border-left-color: var(--asa-action-hover); }
+.asa-alert--info  { border-left-color: var(--asa-ink); }
+.asa-alert--warn  { border-left-color: var(--asa-warn); background: var(--asa-warn-bg); }
+
+/* Compacta: cabe numa barra de resumo, sem o corpo de duas linhas. */
+.asa-alert--compact {
+  align-items: center;
+  padding: var(--asa-space-3);
+}
+
+.asa-alert__body { display: flex; flex-direction: column; gap: 4px; }
+
+.asa-alert__title {
+  font-size: var(--asa-fs-body-dense);
+  line-height: 1.3;
+  font-weight: var(--asa-weight-bold);
+  color: var(--asa-ink);
+}
+
+.asa-alert__text {
+  font-size: var(--asa-fs-body-dense);
+  line-height: 1.5;
+  color: var(--asa-ink-2);
+  max-width: none;
+}
+
+/* ==========================================================================
+   SKELETON
+   No formato do conteúdo final, não um spinner: a pessoa já entende a
+   estrutura da tela antes dos dados chegarem, e lê isso como "quase pronto".
+   Estático de propósito — um brilho em loop contínuo violaria o teto de
+   400ms e a regra de que nada no sistema pulsa.
+   ========================================================================== */
+
+.asa-skeleton {
+  background: var(--asa-disabled-bg);
+  border-radius: var(--asa-radius);
+}
+
+.asa-skeleton--text  { height: 12px; }
+.asa-skeleton--title { height: 18px; }
+.asa-skeleton--media { aspect-ratio: 16 / 9; border-radius: 0; }
+
+/* ==========================================================================
+   CAMADA FLUTUANTE — overlay, modal, sheet, popover, menu, disclosure
+   Lacuna 1: até esta rodada, o sistema não tinha NENHUMA superfície fora do
+   fluxo do documento — nem um dropdown. Pré-requisito de MUST #2 (filtro),
+   #3 (busca), #4 (comparação), #5 (checkout) e #7 (conta).
+
+   Por que não sobre branco: com o body branco (divergência #5), um popover
+   branco separado do fundo branco por 14% de borda é praticamente invisível.
+   T3 resolve com --asa-surface-float, uma segunda superfície neutra —
+   originalmente o creme, revisado em 12/09/2026 para --asa-mist (cinza
+   ultraclaro sem viés de matiz), porque o creme lia como amarelo diluído
+   em toda superfície flutuante do sistema.
+
+   Estado por [data-state], nunca classe modificadora — é o padrão do resto
+   do sistema (:disabled, [aria-invalid], [aria-current]).
+
+   Movimento: entrada usa --asa-ease / --asa-dur-scene, igual ao resto do
+   sistema. Saída (Lacuna 12) usa --asa-ease-in e a duração mais curta
+   --asa-dur-fast — overlay que demora tanto para sair quanto para entrar
+   parece travado, não deliberado. Nenhuma rotação em lugar nenhum: o
+   indicador de disclosure troca de ícone, não gira.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   OVERLAY — o véu por trás de modal e sheet. Sozinho, sem superfície: quem
+   usa monta modal ou sheet dentro dele.
+   -------------------------------------------------------------------------- */
+.asa-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--asa-z-overlay);
+  background: var(--asa-scrim);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--asa-dur-scene) var(--asa-ease);
+}
+
+.asa-overlay[data-state="open"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.asa-overlay[data-state="closing"] {
+  transition-duration: var(--asa-dur-fast);
+  transition-timing-function: var(--asa-ease-in);
+}
+
+/* --------------------------------------------------------------------------
+   MODAL — diálogo centrado. Uso: confirmar cancelamento, explicar a
+   caução com valor exato, comparar dois carros lado a lado no mobile.
+   -------------------------------------------------------------------------- */
+.asa-modal {
+  position: fixed;
+  inset: 0;
+  z-index: var(--asa-z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--asa-space-4);
+  pointer-events: none;
+}
+
+.asa-modal[data-state="open"] { pointer-events: auto; }
+
+.asa-modal__surface {
+  width: 100%;
+  max-width: 480px;
+  max-height: min(88vh, 720px);
+  overflow-y: auto;
+  background: var(--asa-surface-float);
+  border: var(--asa-border-width) solid var(--asa-line-strong);
+  border-radius: var(--asa-radius);
+  padding: var(--asa-space-6);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity var(--asa-dur-scene) var(--asa-ease),
+              transform var(--asa-dur-scene) var(--asa-ease);
+}
+
+.asa-modal[data-state="open"] .asa-modal__surface {
+  opacity: 1;
+  transform: none;
+}
+
+.asa-modal[data-state="closing"] .asa-modal__surface {
+  transition-duration: var(--asa-dur-fast);
+  transition-timing-function: var(--asa-ease-in);
+}
+
+.asa-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--asa-space-3);
+  margin-bottom: var(--asa-space-4);
+}
+
+.asa-modal__title {
+  font-size: var(--asa-fs-highlight);
+  font-weight: var(--asa-weight-bold);
+  color: var(--asa-ink);
+  margin: 0;
+}
+
+.asa-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--asa-space-3);
+}
+
+.asa-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--asa-space-3);
+  margin-top: var(--asa-space-6);
+}
+
+/* --------------------------------------------------------------------------
+   SHEET — a mesma função do modal, ancorada embaixo. Padrão mobile: filtro
+   da vitrine, seleção de proteção, disclosure de devolução no motor.
+   -------------------------------------------------------------------------- */
+.asa-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: var(--asa-z-modal);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.asa-sheet[data-state="open"] { pointer-events: auto; }
+
+.asa-sheet__surface {
+  width: 100%;
+  max-width: 560px;
+  max-height: 86vh;
+  overflow-y: auto;
+  background: var(--asa-surface-float);
+  border: var(--asa-border-width) solid var(--asa-line-strong);
+  border-bottom: none;
+  border-radius: var(--asa-radius) var(--asa-radius) 0 0;
+  padding: var(--asa-space-3) var(--asa-space-6) var(--asa-space-6);
+  transform: translateY(100%);
+  transition: transform var(--asa-dur-scene) var(--asa-ease);
+}
+
+.asa-sheet[data-state="open"] .asa-sheet__surface { transform: none; }
+
+.asa-sheet[data-state="closing"] .asa-sheet__surface {
+  transition-duration: var(--asa-dur-fast);
+  transition-timing-function: var(--asa-ease-in);
+}
+
+/* Puxador — sinaliza "isto arrasta" sem precisar de instrução escrita. */
+.asa-sheet__handle {
+  width: 36px;
+  height: 4px;
+  border-radius: var(--asa-radius-full);
+  background: var(--asa-line-strong);
+  margin: 0 auto var(--asa-space-4);
+}
+
+/* --------------------------------------------------------------------------
+   POPOVER — ancorado a um elemento, sem véu por trás. Uso: sugestão do
+   autocomplete de local, calendário do date picker, tooltip de ajuda.
+   Posicionar com JS (getBoundingClientRect do gatilho) — o CSS só cobre a
+   superfície e a transição, não o cálculo de posição.
+   -------------------------------------------------------------------------- */
+.asa-popover {
+  position: absolute;
+  z-index: var(--asa-z-popover);
+  min-width: 220px;
+  background: var(--asa-surface-float);
+  border: var(--asa-border-width) solid var(--asa-line-strong);
+  border-radius: var(--asa-radius);
+  padding: var(--asa-space-3);
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition: opacity var(--asa-dur-fast) var(--asa-ease),
+              transform var(--asa-dur-fast) var(--asa-ease);
+}
+
+.asa-popover[data-state="open"] {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.asa-popover[data-state="closing"] {
+  transition-timing-function: var(--asa-ease-in);
+}
+
+/* --------------------------------------------------------------------------
+   MENU — lista de ações dentro de uma superfície flutuante (conta,
+   idioma, ações do card salvo). Vive dentro de um .asa-popover.
+   -------------------------------------------------------------------------- */
+.asa-menu {
+  list-style: none;
+  margin: 0;
+  padding: var(--asa-space-2) 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.asa-menu__item {
+  display: flex;
+  align-items: center;
+  gap: var(--asa-space-2);
+  min-height: var(--asa-touch-min);
+  padding: 0 var(--asa-space-3);
+  background: none;
+  border: none;
+  border-radius: var(--asa-radius);
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  color: var(--asa-ink);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--asa-dur-fast) var(--asa-ease);
+}
+
+.asa-menu__item:hover:not(:disabled),
+.asa-menu__item:focus-visible {
+  background: var(--asa-surface-hover);
+}
+
+.asa-menu__item[data-state="selected"] {
+  background: var(--asa-surface-selected);
+  font-weight: var(--asa-weight-medium);
+}
+
+.asa-menu__item--danger { color: var(--asa-action-hover); }
+
+.asa-menu__item:disabled {
+  color: var(--asa-disabled-text);
+  cursor: not-allowed;
+}
+
+.asa-menu__divider {
+  height: var(--asa-border-width);
+  background: var(--asa-line-soft);
+  border: none;
+  margin: var(--asa-space-2) 0;
+}
+
+/* --------------------------------------------------------------------------
+   DISCLOSURE — expandir/recolher inline, não flutuante. Uso: FAQ,
+   detalhamento de proteção, "o que muda se eu cancelar".
+   O indicador TROCA de ícone — nunca gira. É regra dura do sistema
+   (11-movimento.html): nada gira, nada pulsa, nada tem bounce.
+   -------------------------------------------------------------------------- */
+.asa-disclosure { border-bottom: var(--asa-border-width) solid var(--asa-line); }
+
+.asa-disclosure__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--asa-space-3);
+  width: 100%;
+  min-height: var(--asa-touch-min);
+  padding: var(--asa-space-3) 0;
+  background: none;
+  border: none;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  font-weight: var(--asa-weight-medium);
+  color: var(--asa-ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.asa-disclosure__icon--open  { display: none; }
+.asa-disclosure__icon--closed { display: block; }
+
+.asa-disclosure[data-state="open"] .asa-disclosure__icon--open  { display: block; }
+.asa-disclosure[data-state="open"] .asa-disclosure__icon--closed { display: none; }
+
+.asa-disclosure__panel {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height var(--asa-dur-scene) var(--asa-ease);
+}
+
+.asa-disclosure[data-state="open"] .asa-disclosure__panel {
+  max-height: var(--asa-disclosure-h, 480px);
+}
+
+.asa-disclosure__body {
+  padding-bottom: var(--asa-space-4);
+  color: var(--asa-ink-2);
+}
+
+/* --------------------------------------------------------------------------
+   SKIP LINK — MUST de acessibilidade que nenhuma das 13 páginas de
+   documentação precisa (a navbar é curta), mas o portal de 70 páginas com
+   header de duas camadas, sim. Invisível até ganhar foco de teclado.
+   -------------------------------------------------------------------------- */
+.asa-skiplink {
+  position: fixed;
+  top: -100%;
+  left: var(--asa-space-3);
+  z-index: var(--asa-z-toast);
+  padding: 12px 20px;
+  background: var(--asa-ink);
+  color: var(--asa-ink-inverse);
+  border-radius: var(--asa-radius);
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  font-weight: var(--asa-weight-medium);
+  text-decoration: none;
+  transition: top var(--asa-dur-fast) var(--asa-ease);
+}
+
+.asa-skiplink:focus {
+  top: var(--asa-space-3);
+}
+
+/* ==========================================================================
+   NAVEGAÇÃO DE PRODUTO
+   asa-doc-nav (em asa-docs.css) é chrome desta documentação — o README já
+   diz que não vai para produção. Estes três são o menu real do portal:
+   pré-requisito de MUST #6, "a Budget mostra a melhor solução: duas
+   camadas" (§5.8).
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   UTILITY BAR — a camada de cima. Não é sticky de propósito: rola para
+   fora, e é assim que o navbar abaixo assume sozinho o offset de
+   --asa-header-h quando gruda no topo — sem precisar somar duas alturas.
+   -------------------------------------------------------------------------- */
+/* Some abaixo de 768px: telefone, cidade e idioma cabem no navdrawer, que
+   já leva "Minha reserva" — não vale disputar 36px de altura com texto que
+   quebra em duas linhas e estoura a barra. */
+.asa-utilitybar {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--asa-space-4);
+  height: 36px;
+  padding: 0 var(--asa-space-6);
+  background: var(--asa-bg-dense);
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-label);
+  color: var(--asa-ink-inverse-2);
+}
+
+@media (min-width: 768px) {
+  .asa-utilitybar { display: flex; }
+}
+
+.asa-utilitybar__group {
+  display: flex;
+  align-items: center;
+  gap: var(--asa-space-4);
+  height: 100%;
+}
+
+.asa-utilitybar__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.asa-utilitybar__link:hover { color: var(--asa-ink-inverse); }
+
+.asa-utilitybar__link .asa-icon { width: 14px; height: 14px; }
+
+/* --------------------------------------------------------------------------
+   NAVBAR — a camada de baixo, sticky. É esta altura que --asa-header-h
+   mede (Lacuna 9): o link ocupa 100% da altura do header, não só a do seu
+   próprio texto, para que o alvo de toque seja o header inteiro, não uma
+   faixa de 20px dentro dele — o mesmo princípio já aplicado em asa-doc-nav.
+   -------------------------------------------------------------------------- */
+.asa-navbar {
+  position: sticky;
+  top: 0;
+  z-index: var(--asa-z-sticky);
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: var(--asa-space-4);
+  height: var(--asa-header-h);
+  padding: 0 var(--asa-space-6);
+  background: var(--asa-bg-elevated);
+  border-bottom: var(--asa-border-width) solid var(--asa-line);
+}
+
+.asa-navbar__brand {
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+
+.asa-navbar__brand img { height: 26px; width: auto; }
+
+.asa-navbar__nav {
+  display: none;
+  align-items: stretch;
+  gap: var(--asa-space-6);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 1024px) {
+  .asa-navbar__nav { display: flex; }
+}
+
+.asa-navbar__link {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  font-weight: var(--asa-weight-medium);
+  color: var(--asa-ink-2);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+}
+
+.asa-navbar__link:hover { color: var(--asa-ink); }
+
+.asa-navbar__link[aria-current="page"] {
+  color: var(--asa-ink);
+  font-weight: var(--asa-weight-bold);
+  border-bottom-color: var(--asa-action);
+}
+
+.asa-navbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--asa-space-3);
+  flex: none;
+}
+
+.asa-navbar__toggle { display: inline-flex; }
+
+@media (min-width: 1024px) {
+  .asa-navbar__toggle { display: none; }
+}
+
+/* --------------------------------------------------------------------------
+   NAVDRAWER — substituto mobile do menu horizontal. Mesmo par overlay +
+   painel do modal e do sheet; muda só a direção de entrada (lateral).
+   -------------------------------------------------------------------------- */
+.asa-navdrawer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--asa-z-modal);
+  display: flex;
+  pointer-events: none;
+}
+
+.asa-navdrawer[data-state="open"] { pointer-events: auto; }
+
+.asa-navdrawer__surface {
+  width: min(320px, 86vw);
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--asa-space-4);
+  background: var(--asa-surface-float);
+  border-right: var(--asa-border-width) solid var(--asa-line-strong);
+  padding: var(--asa-space-4);
+  transform: translateX(-100%);
+  transition: transform var(--asa-dur-scene) var(--asa-ease);
+}
+
+.asa-navdrawer[data-state="open"] .asa-navdrawer__surface { transform: none; }
+
+.asa-navdrawer[data-state="closing"] .asa-navdrawer__surface {
+  transition-duration: var(--asa-dur-fast);
+  transition-timing-function: var(--asa-ease-in);
+}
+
+.asa-navdrawer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.asa-navdrawer__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.asa-navdrawer__link {
+  display: flex;
+  align-items: center;
+  min-height: var(--asa-touch-min);
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-highlight);
+  font-weight: var(--asa-weight-bold);
+  color: var(--asa-ink);
+  text-decoration: none;
+  border-bottom: var(--asa-border-width) solid var(--asa-line-soft);
+}
+
+.asa-navdrawer__link[aria-current="page"] { color: var(--asa-action); }
+
+/* ==========================================================================
+   VITRINE
+   Os últimos elos que fecham F1 do lado de mostrar o carro: filtro,
+   resultado, ficha técnica, nota e o estado vazio que os filtros
+   combináveis produzem inevitavelmente (MUST #3).
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   FILTROS — vive dentro de .asa-layout-2col. Cada opção é um .asa-choice
+   com a contagem à direita; contagem zero desabilita o input, nunca
+   esconde a opção (esconder muda o layout a cada clique).
+   -------------------------------------------------------------------------- */
+.asa-filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--asa-space-5);
+}
+
+.asa-filters__group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: var(--asa-space-4);
+  border-bottom: var(--asa-border-width) solid var(--asa-line-soft);
+}
+
+.asa-filters__group:last-of-type {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.asa-filters__group-title {
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-label);
+  font-weight: var(--asa-weight-bold);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--asa-ink);
+  margin-bottom: 6px;
+}
+
+.asa-filters__option {
+  justify-content: space-between;
+  width: 100%;
+}
+
+.asa-filters__count {
+  flex: none;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-label);
+  color: var(--asa-ink-3);
+}
+
+.asa-filters__clear {
+  align-self: flex-start;
+}
+
+/* --------------------------------------------------------------------------
+   RESULT BAR — "32 carros disponíveis · Ordenar: Recomendado ▾" (§6.3).
+   -------------------------------------------------------------------------- */
+.asa-resultbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--asa-space-3);
+  padding-bottom: var(--asa-space-3);
+  border-bottom: var(--asa-border-width) solid var(--asa-line-soft);
+}
+
+.asa-resultbar__count {
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-subtitle);
+  font-weight: var(--asa-weight-bold);
+  color: var(--asa-ink);
+}
+
+.asa-resultbar__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--asa-space-2);
+}
+
+.asa-resultbar__sort {
+  display: flex;
+  align-items: center;
+  gap: var(--asa-space-2);
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  color: var(--asa-ink-2);
+  white-space: nowrap;
+}
+
+.asa-resultbar__sort .asa-select {
+  width: auto;
+  min-height: 36px;
+  padding: 0 var(--asa-space-3);
+}
+
+/* --------------------------------------------------------------------------
+   SPECLIST — os cinco atributos do card (§5.2): lugares, malas, câmbio,
+   ar, km livre. Slot, não parágrafo — cada atributo é procurável e
+   estilizável sozinho.
+   -------------------------------------------------------------------------- */
+.asa-speclist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--asa-space-2) var(--asa-space-4);
+}
+
+.asa-speclist__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  color: var(--asa-ink-2);
+}
+
+.asa-speclist__item .asa-icon {
+  width: var(--asa-icon-dense);
+  height: var(--asa-icon-dense);
+  color: var(--asa-ink-3);
+}
+
+/* --------------------------------------------------------------------------
+   RATING — nota dentro do card, no ponto de decisão (§5.4, MUST #8).
+   T12: nunca estrela amarela — o amarelo é o ativo cromático mais forte
+   da marca, e "avaliação" não pode virar o que ele significa. Sem
+   estrela é o padrão; __icon existe só para quem decidir usá-la, sempre
+   em --asa-ink.
+   -------------------------------------------------------------------------- */
+.asa-rating {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.asa-rating__value {
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  font-weight: var(--asa-weight-bold);
+  color: var(--asa-ink);
+}
+
+.asa-rating__icon {
+  width: 14px;
+  height: 14px;
+  color: var(--asa-ink);
+  align-self: center;
+}
+
+.asa-rating__count,
+.asa-rating__source {
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-label);
+  color: var(--asa-ink-3);
+}
+
+/* --------------------------------------------------------------------------
+   EMPTY STATE — consequência inevitável de filtros combináveis (MUST #3).
+   -------------------------------------------------------------------------- */
+.asa-emptystate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--asa-space-3);
+  padding: var(--asa-space-9) var(--asa-space-4);
+}
+
+.asa-emptystate .asa-icon--feature { color: var(--asa-ink-3); }
+
+.asa-emptystate__title {
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-subtitle);
+  font-weight: var(--asa-weight-bold);
+  color: var(--asa-ink);
+  margin: 0;
+}
+
+.asa-emptystate__text {
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  color: var(--asa-ink-3);
+  max-width: 40ch;
+}
+
+/* ==========================================================================
+   FUNIL
+   Os seis componentes do checkout: resumo, upsell, comparação de
+   proteção, adicional, detalhamento de preço e meio de pagamento.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   SUMMARY — "resumo do pedido fixo à direita" (§5.2), que a Asa já faz
+   bem hoje mas nunca foi codificado. --sticky e --bar convivem no mesmo
+   markup: o CSS troca por breakpoint, ninguém precisa decidir em JS.
+   -------------------------------------------------------------------------- */
+.asa-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--asa-space-3);
+  padding: var(--asa-space-4);
+  background: var(--asa-bg-elevated);
+  border: var(--asa-border-width) solid var(--asa-line);
+  border-radius: var(--asa-radius);
+}
+
+.asa-summary--sticky {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .asa-summary--sticky {
+    display: flex;
+    position: sticky;
+    top: calc(var(--asa-header-h) + var(--asa-space-4));
+  }
+}
+
+.asa-summary--bar {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: var(--asa-z-sticky);
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 0;
+  border: none;
+  border-top: var(--asa-border-width) solid var(--asa-line);
+}
+
+@media (min-width: 1024px) {
+  .asa-summary--bar { display: none; }
+}
+
+.asa-summary__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--asa-space-3);
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  color: var(--asa-ink-2);
+}
+
+.asa-summary__row--total {
+  padding-top: var(--asa-space-3);
+  border-top: var(--asa-border-width) solid var(--asa-line-soft);
+  font-weight: var(--asa-weight-bold);
+  color: var(--asa-ink);
+}
+
+/* --------------------------------------------------------------------------
+   UPSELL — "+R$3,00/dia, escolhido por 4 em cada 10 clientes" (§5.2):
+   já é prática da Asa, nunca teve componente.
+   -------------------------------------------------------------------------- */
+.asa-upsell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--asa-space-3);
+  padding: var(--asa-space-4);
+  border: var(--asa-border-width) solid var(--asa-line);
+  border-radius: var(--asa-radius);
+  cursor: pointer;
+}
+
+.asa-upsell__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.asa-upsell__title {
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  font-weight: var(--asa-weight-bold);
+  color: var(--asa-ink);
+}
+
+.asa-upsell__proof {
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-label);
+  color: var(--asa-ink-3);
+}
+
+.asa-upsell__delta {
+  flex: none;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  font-weight: var(--asa-weight-bold);
+  color: var(--asa-ink);
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   COMPARISON — "trocar os três blocos de texto de proteção por tabela
+   comparativa lado a lado" (§6.3, etapa 3, explícito).
+   -------------------------------------------------------------------------- */
+.asa-comparison {
+  border: var(--asa-border-width) solid var(--asa-line);
+  border-radius: var(--asa-radius);
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+/* --asa-comparison-cols é o número de planos comparados (padrão 3) —
+   declarar no elemento .asa-comparison quando o número mudar. auto-fit não
+   serve aqui: o número de colunas é decidido por quem monta a tela, não
+   pelo espaço disponível, que só decide se a tabela rola ou não. */
+.asa-comparison__row {
+  display: grid;
+  grid-template-columns: 1.4fr repeat(var(--asa-comparison-cols, 3), minmax(90px, 1fr));
+  min-width: 480px;
+}
+
+.asa-comparison__row + .asa-comparison__row {
+  border-top: var(--asa-border-width) solid var(--asa-line-soft);
+}
+
+.asa-comparison__row--head {
+  background: var(--asa-bg);
+}
+
+.asa-comparison__col {
+  padding: var(--asa-space-3);
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  color: var(--asa-ink-2);
+  border-left: var(--asa-border-width) solid var(--asa-line-soft);
+}
+
+.asa-comparison__col:first-child {
+  border-left: none;
+  font-weight: var(--asa-weight-medium);
+  color: var(--asa-ink);
+}
+
+.asa-comparison__row--head .asa-comparison__col {
+  font-weight: var(--asa-weight-bold);
+  color: var(--asa-ink);
+}
+
+.asa-comparison__col--selected { background: var(--asa-surface-selected); }
+
+/* --------------------------------------------------------------------------
+   PRICE BREAKDOWN — mora dentro de um .asa-disclosure. Reaproveita
+   .asa-summary__row: são a mesma linha "rótulo · valor" em dois lugares
+   do funil, e um segundo nome de classe para o mesmo desenho seria
+   dívida, não componente.
+   -------------------------------------------------------------------------- */
+.asa-pricebreakdown {
+  display: flex;
+  flex-direction: column;
+  gap: var(--asa-space-2);
+}
+
+/* --------------------------------------------------------------------------
+   PAYMETHOD — "12x sem juros, desconto no Pix, combinar meios" (§5.3,
+   MUST #5). Pix turquesa (T11): cor de terceiro isolada neste selo.
+   -------------------------------------------------------------------------- */
+.asa-paymethod {
+  display: flex;
+  flex-direction: column;
+  gap: var(--asa-space-3);
+}
+
+.asa-paymethod__pix {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 2px 8px;
+  border-radius: var(--asa-radius);
+  background: #E6F9F6;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-label);
+  font-weight: var(--asa-weight-medium);
+  color: #0F7A6E;
+}
+
+.asa-paymethod__installments {
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-label);
+  color: var(--asa-ink-3);
+}
+
+.asa-paymethod__discount {
+  font-family: var(--asa-font);
+  font-weight: var(--asa-weight-medium);
+  color: var(--asa-ok);
+}
+
+/* ==========================================================================
+   PÓS-VENDA
+   asa-card-booking e asa-tasklist — /minha-reserva por inteiro (§5.5,
+   §6.1) e "TUDO RESOLVIDO SEM SAIR DAQUI" (§6.2).
+   ========================================================================== */
+
+.asa-card-booking__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--asa-space-3);
+  padding: var(--asa-space-4) var(--asa-space-4) 0;
+}
+
+.asa-card-booking__code {
+  font-family: var(--asa-font-mono);
+  font-size: var(--asa-fs-label);
+  letter-spacing: var(--asa-tracking-mono);
+  color: var(--asa-ink-3);
+}
+
+.asa-card-booking__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--asa-space-2);
+  padding: var(--asa-space-3) var(--asa-space-4);
+}
+
+.asa-card-booking__vehicle {
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-subtitle);
+  font-weight: var(--asa-weight-bold);
+  color: var(--asa-ink);
+}
+
+.asa-card-booking__footer {
+  display: flex;
+  gap: var(--asa-space-2);
+  padding: 0 var(--asa-space-4) var(--asa-space-4);
+}
+
+/* Lista de tarefas — não é stepper (uma etapa por vez, ordem fixa): aqui
+   as tarefas podem ser concluídas fora de ordem, cada uma independente. */
+.asa-tasklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.asa-tasklist__item {
+  display: flex;
+  align-items: center;
+  gap: var(--asa-space-3);
+  min-height: var(--asa-touch-min);
+  padding: var(--asa-space-2) 0;
+  border-bottom: var(--asa-border-width) solid var(--asa-line-soft);
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  color: var(--asa-ink-2);
+}
+
+.asa-tasklist__item:last-child { border-bottom: none; }
+
+.asa-tasklist__item .asa-icon {
+  flex: none;
+  color: var(--asa-ink-3);
+}
+
+.asa-tasklist__item[data-state="done"] {
+  color: var(--asa-ink-3);
+  text-decoration: line-through;
+}
+
+.asa-tasklist__item[data-state="done"] .asa-icon { color: var(--asa-ok); }
+
+.asa-tasklist__item[aria-current="step"] {
+  color: var(--asa-ink);
+  font-weight: var(--asa-weight-medium);
+}
+
+/* ==========================================================================
+   CONFIANÇA E CONFORMIDADE
+   asa-reassurance, asa-consent, asa-stickybar e asa-figure — a trinca de
+   reasseguro (§3 #7), o consentimento LGPD (MUST #10), a barra fixa de
+   cupom (§5.8) e a foto real que substitui o hachurado quando ela existir.
+   ========================================================================== */
+
+.asa-reassurance {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--asa-space-5);
+}
+
+.asa-reassurance__item {
+  display: flex;
+  align-items: center;
+  gap: var(--asa-space-2);
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  color: var(--asa-ink-2);
+}
+
+.asa-reassurance__item .asa-icon {
+  flex: none;
+  color: var(--asa-ok);
+}
+
+.asa-reassurance__proof {
+  width: 100%;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-label);
+  font-style: italic;
+  color: var(--asa-ink-3);
+}
+
+/* Consentimento — banner fixo no rodapé da viewport até decisão; __prefs
+   é o painel de granularidade, revelado por disclosure, não por padrão. */
+.asa-consent {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: var(--asa-z-toast);
+  padding: var(--asa-space-4);
+  background: var(--asa-bg-elevated);
+  border-top: var(--asa-border-width) solid var(--asa-line);
+}
+
+.asa-consent[data-state="closed"] { display: none; }
+
+.asa-consent__banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--asa-space-4);
+  max-width: var(--asa-container-max);
+  margin-inline: auto;
+}
+
+.asa-consent__text {
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  color: var(--asa-ink-2);
+  max-width: 60ch;
+  margin: 0;
+}
+
+.asa-consent__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--asa-space-2);
+}
+
+.asa-consent__prefs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--asa-space-3);
+  margin-top: var(--asa-space-4);
+  padding-top: var(--asa-space-4);
+  border-top: var(--asa-border-width) solid var(--asa-line-soft);
+  max-width: var(--asa-container-max);
+  margin-inline: auto;
+}
+
+/* Sticky bar — "cupom de primeira locação em vez de um slide de carrossel
+   que passa" (§5.8). Sticky sob o navbar, não fixed: some com o scroll
+   para cima do topo, nunca sobrepõe o header. */
+.asa-stickybar {
+  position: sticky;
+  top: var(--asa-header-h);
+  z-index: var(--asa-z-sticky);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--asa-space-3);
+  padding: 10px 44px;
+  background: var(--asa-ink);
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-label);
+  color: var(--asa-ink-inverse);
+  text-align: center;
+}
+
+.asa-stickybar[data-state="closed"] { display: none; }
+
+.asa-stickybar__dismiss {
+  position: absolute;
+  right: var(--asa-space-3);
+  color: var(--asa-ink-inverse);
+}
+
+/* Figura — o modo "foto real" que asa-photo (hachura) substitui quando a
+   fotografia existir. Mesma proporção, mesma legenda, câmera diferente. */
+.asa-figure {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+}
+
+.asa-figure img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.asa-figure__caption {
+  position: absolute;
+  left: var(--asa-space-3);
+  bottom: var(--asa-space-3);
+  font-family: var(--asa-font-mono);
+  font-size: var(--asa-fs-label);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, .55);
+}
+
+.asa-figure--16x9  { aspect-ratio: 16 / 9; }
+.asa-figure--4x5   { aspect-ratio: 4 / 5; }
+.asa-figure--16x10 { aspect-ratio: 16 / 10; }
+
+/* ==========================================================================
+   NAVEGAÇÃO ESTENDIDA — F2/F3
+   Rodapé, trilha de localização, alternância de contexto e a barra de abas
+   nativa promovida de chrome de documentação a componente de produto.
+   ========================================================================== */
+
+/* Rodapé — hub de links por abas (Aeroportos/Cidades/Destinos, §6.2). É a
+   única superfície do sistema, além do vídeo, em --asa-bg-deep: aqui não
+   há flutuação a resolver, é chão de página, não T3. */
+.asa-footer {
+  background: var(--asa-bg-deep);
+  color: var(--asa-ink-inverse-2);
+  padding: var(--asa-space-9) var(--asa-space-4) var(--asa-space-6);
+}
+
+.asa-footer__inner {
+  max-width: var(--asa-container-max);
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--asa-space-7);
+}
+
+.asa-footer__brand img { height: 28px; width: auto; }
+
+.asa-footer__tabs {
+  display: flex;
+  gap: var(--asa-space-1);
+  border-bottom: var(--asa-border-width) solid var(--asa-line-inverse);
+}
+
+.asa-footer__tab {
+  padding: var(--asa-space-2) var(--asa-space-1) var(--asa-space-3);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1.5px;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  font-weight: var(--asa-weight-medium);
+  color: var(--asa-ink-inverse-2);
+  cursor: pointer;
+}
+
+.asa-footer__tab[aria-selected="true"] {
+  color: var(--asa-ink-inverse);
+  border-bottom-color: var(--asa-yellow);
+}
+
+.asa-footer__linkhub {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--asa-space-3) var(--asa-space-6);
+}
+
+@media (min-width: 768px) {
+  .asa-footer__linkhub { grid-template-columns: repeat(4, 1fr); }
+}
+
+.asa-footer__group { display: flex; flex-direction: column; }
+
+.asa-footer__group-title {
+  font-family: var(--asa-font-mono);
+  font-size: var(--asa-fs-label);
+  letter-spacing: var(--asa-tracking-mono);
+  text-transform: uppercase;
+  color: var(--asa-gray-dark-1);
+  margin: 0 0 var(--asa-space-2);
+}
+
+.asa-footer__link {
+  display: block;
+  padding: 4px 0;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  color: var(--asa-ink-inverse-2);
+  text-decoration: none;
+}
+
+.asa-footer__link:hover { color: var(--asa-ink-inverse); }
+
+.asa-footer__bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--asa-space-3);
+  padding-top: var(--asa-space-6);
+  border-top: var(--asa-border-width) solid var(--asa-line-inverse);
+}
+
+.asa-footer__legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--asa-space-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-label);
+  color: var(--asa-gray-dark-1);
+}
+
+.asa-footer__legal a { color: inherit; text-decoration: none; }
+.asa-footer__legal a:hover { color: var(--asa-ink-inverse); }
+
+.asa-footer__social { display: flex; gap: var(--asa-space-3); }
+.asa-footer__social .asa-icon { width: 18px; height: 18px; color: var(--asa-ink-inverse-2); }
+.asa-footer__social a:hover .asa-icon { color: var(--asa-ink-inverse); }
+
+/* Breadcrumb — trilha de IA de ~70 páginas em até 4 níveis (§6.1). O último
+   item é a página atual e não é link, mesmo padrão de aria-current do
+   navbar e do navdrawer. */
+.asa-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-label);
+}
+
+.asa-breadcrumb__item { display: flex; align-items: center; gap: 6px; }
+
+.asa-breadcrumb__link { color: var(--asa-ink-3); text-decoration: none; }
+.asa-breadcrumb__link:hover { color: var(--asa-ink); text-decoration: underline; }
+
+.asa-breadcrumb__item[aria-current="page"] {
+  color: var(--asa-ink);
+  font-weight: var(--asa-weight-medium);
+}
+
+.asa-breadcrumb__sep { width: 12px; height: 12px; color: var(--asa-ink-3); }
+
+/* Tabs — variante de linha para trocar categoria de conteúdo/linha de
+   negócio (§3 #6), e --segmented para alternância binária de contexto
+   (Alugar | Comprar, SHOULD #17). O padrão de linha já existia preso a
+   asa-search__tab; isto o libera para uso fora do motor de busca. */
+.asa-tabs {
+  display: flex;
+  gap: var(--asa-space-1);
+  border-bottom: var(--asa-border-width) solid var(--asa-line);
+}
+
+.asa-tabs__tab {
+  padding: 10px var(--asa-space-4);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1.5px;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  font-weight: var(--asa-weight-medium);
+  color: var(--asa-ink-3);
+  cursor: pointer;
+}
+
+.asa-tabs__tab[aria-selected="true"] {
+  color: var(--asa-ink);
+  font-weight: var(--asa-weight-bold);
+  border-bottom-color: var(--asa-action);
+}
+
+/* Segmentado — os dois lados têm peso igual, por isso um traço de fundo
+   neutro em vez de um preenchimento vermelho: preenchido leria como um
+   terceiro botão na tela, disputando com o CTA (T1). */
+.asa-tabs--segmented {
+  display: inline-flex;
+  width: fit-content;
+  gap: var(--asa-space-1);
+  border: none;
+  padding: 3px;
+  background: var(--asa-disabled-bg);
+  border-radius: var(--asa-radius);
+}
+
+.asa-tabs--segmented .asa-tabs__tab {
+  border-bottom: none;
+  margin-bottom: 0;
+  border-radius: calc(var(--asa-radius) - 3px);
+  padding: 8px var(--asa-space-4);
+  color: var(--asa-ink-2);
+}
+
+.asa-tabs--segmented .asa-tabs__tab[aria-selected="true"] {
+  background: var(--asa-bg-elevated);
+  color: var(--asa-ink);
+}
+
+/* Tab bar de app — promovida de chrome de documentação (asa-phone__tabbar
+   em asa-docs.css) a componente de produto de verdade. O estado ativo usa
+   o mesmo sinal do link de navbar: cor + peso + traço vermelho como
+   indicador de posição — não é uma segunda ação, é a mesma linguagem de
+   "onde eu estou" que o navbar já usa. */
+.asa-tabbar {
+  display: flex;
+  align-items: stretch;
+  background: var(--asa-bg-elevated);
+  border-top: var(--asa-border-width) solid var(--asa-line);
+}
+
+.asa-tabbar__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: var(--asa-space-2) 0;
+  border-top: 2px solid transparent;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-label);
+  color: var(--asa-ink-3);
+  text-decoration: none;
+}
+
+.asa-tabbar__item[aria-current="page"] {
+  color: var(--asa-ink);
+  font-weight: var(--asa-weight-medium);
+  border-top-color: var(--asa-action);
+}
+
+/* ==========================================================================
+   VITRINE ESTENDIDA — F2
+   Prateleiras contextuais e os quatro cartões de conteúdo/local que a home
+   e os hubs de página precisam além do card de veículo.
+   ========================================================================== */
+
+/* Prateleira — rolagem nativa, sem JS de carrossel e sem indicador de
+   página: "nada gira" também vale para bolinhas de paginação que piscam. */
+.asa-shelf { display: flex; flex-direction: column; }
+
+.asa-shelf__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--asa-space-3);
+  margin-bottom: var(--asa-space-4);
+}
+
+.asa-shelf__title {
+  font-size: var(--asa-fs-subtitle);
+  font-weight: var(--asa-weight-bold);
+  color: var(--asa-ink);
+  margin: 0;
+}
+
+.asa-shelf__link {
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  font-weight: var(--asa-weight-medium);
+  color: var(--asa-action-hover);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.asa-shelf__track {
+  display: flex;
+  gap: var(--asa-space-4);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-bottom: var(--asa-space-2);
+  margin-bottom: calc(var(--asa-space-2) * -1);
+}
+
+.asa-shelf__track > * {
+  flex: 0 0 auto;
+  width: 260px;
+  scroll-snap-align: start;
+}
+
+.asa-card-destination { display: block; text-decoration: none; color: inherit; }
+
+.asa-card-destination__title {
+  margin: var(--asa-space-2) 0 2px;
+  font-size: var(--asa-fs-subtitle);
+  font-weight: var(--asa-weight-bold);
+  color: var(--asa-ink);
+}
+
+.asa-card-destination__note {
+  margin: 0;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-label);
+  color: var(--asa-ink-3);
+}
+
+/* Oferta — o único card da vitrine, além do de veículo, com permissão para
+   um selo cheio (SHOULD #15): é a própria promoção, não um veículo com
+   etiqueta anexada, então não disputa a cota de vermelho único de T1. */
+.asa-card-offer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--asa-space-2);
+  padding: var(--asa-space-4);
+}
+
+.asa-card-offer__title {
+  margin: 0;
+  font-size: var(--asa-fs-subtitle);
+  font-weight: var(--asa-weight-bold);
+  color: var(--asa-ink);
+}
+
+.asa-card-offer__text {
+  margin: 0;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  color: var(--asa-ink-2);
+}
+
+.asa-card-store {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--asa-space-4);
+}
+
+.asa-card-store__title {
+  margin: 0 0 2px;
+  font-size: var(--asa-fs-subtitle);
+  font-weight: var(--asa-weight-bold);
+  color: var(--asa-ink);
+}
+
+.asa-card-store__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  color: var(--asa-ink-2);
+}
+
+.asa-card-store__row .asa-icon {
+  width: var(--asa-icon-dense);
+  height: var(--asa-icon-dense);
+  color: var(--asa-ink-3);
+  margin-top: 2px;
+}
+
+.asa-card-store__link { font-weight: var(--asa-weight-medium); color: var(--asa-action-hover); }
+
+.asa-card-article {
+  display: flex;
+  flex-direction: column;
+  padding: var(--asa-space-4);
+}
+
+.asa-card-article__category {
+  font-family: var(--asa-font-mono);
+  font-size: var(--asa-fs-label);
+  letter-spacing: var(--asa-tracking-mono);
+  text-transform: uppercase;
+  color: var(--asa-ink-3);
+}
+
+.asa-card-article__title {
+  margin: 6px 0 0;
+  font-size: var(--asa-fs-subtitle);
+  font-weight: var(--asa-weight-bold);
+  color: var(--asa-ink);
+}
+
+.asa-card-article__excerpt {
+  margin: 4px 0 0;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  color: var(--asa-ink-2);
+}
+
+.asa-card-article__meta {
+  margin-top: var(--asa-space-2);
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-label);
+  color: var(--asa-ink-3);
+}
+
+/* Paginação — inferida do blog maduro (~120 páginas). Página atual em
+   preenchimento ink, nunca vermelho: é posição, não ação. */
+.asa-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--asa-space-1);
+}
+
+.asa-pagination__item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--asa-touch-min);
+  height: var(--asa-touch-min);
+  padding: 0 4px;
+  border: none;
+  background: none;
+  border-radius: var(--asa-radius);
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  font-weight: var(--asa-weight-medium);
+  color: var(--asa-ink-2);
+  text-decoration: none;
+}
+
+.asa-pagination__item:hover { background: var(--asa-surface-hover); }
+
+.asa-pagination__item[aria-current="page"] {
+  background: var(--asa-ink);
+  color: var(--asa-ink-inverse);
+}
+
+.asa-pagination__item:disabled,
+.asa-pagination__item[aria-disabled="true"] {
+  color: var(--asa-disabled-text);
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   CONTEÚDO EDITORIAL — F2
+   O sistema definia h1/h2/h3/p/small; ~70 páginas de blog, dúvidas e
+   institucional precisam do bloco de texto corrido, do agrupador de FAQ e
+   da prova social em formato de depoimento.
+   ========================================================================== */
+
+.asa-prose {
+  max-width: var(--asa-measure);
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body);
+  line-height: var(--asa-lh-body);
+  color: var(--asa-ink-2);
+}
+
+.asa-prose h2 {
+  font-size: var(--asa-fs-title);
+  line-height: var(--asa-lh-title);
+  font-weight: var(--asa-weight-black);
+  color: var(--asa-ink);
+  margin: var(--asa-space-8) 0 var(--asa-space-3);
+}
+
+.asa-prose h2:first-child { margin-top: 0; }
+
+.asa-prose h3 {
+  font-size: var(--asa-fs-highlight);
+  line-height: var(--asa-lh-highlight);
+  font-weight: var(--asa-weight-bold);
+  color: var(--asa-ink);
+  margin: var(--asa-space-6) 0 var(--asa-space-2);
+}
+
+.asa-prose p,
+.asa-prose ul,
+.asa-prose ol { margin: 0 0 var(--asa-space-4); }
+
+.asa-prose ul,
+.asa-prose ol { padding-left: 1.2em; }
+
+.asa-prose a { color: var(--asa-action-hover); text-decoration: underline; }
+.asa-prose strong { color: var(--asa-ink); font-weight: var(--asa-weight-bold); }
+
+/* Accordion — agrupador de asa-disclosure para FAQ (§5.7 item 6); o
+   disclosure já resolve o item individual, isto só fecha a borda superior
+   do grupo — reuso, não um quarto padrão de expansível. */
+.asa-accordion { border-top: var(--asa-border-width) solid var(--asa-line); }
+
+.asa-testimonial {
+  display: flex;
+  flex-direction: column;
+  gap: var(--asa-space-4);
+  padding: var(--asa-space-6);
+}
+
+.asa-testimonial__quote {
+  margin: 0;
+  font-size: var(--asa-fs-highlight);
+  line-height: var(--asa-lh-highlight);
+  font-weight: var(--asa-weight-medium);
+  color: var(--asa-ink);
+}
+
+.asa-testimonial__quote::before { content: '"'; }
+.asa-testimonial__quote::after  { content: '"'; }
+
+.asa-testimonial__footer { display: flex; align-items: center; gap: var(--asa-space-3); }
+
+.asa-testimonial__name {
+  display: block;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  font-weight: var(--asa-weight-bold);
+  color: var(--asa-ink);
+}
+
+.asa-testimonial__source {
+  display: block;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-label);
+  color: var(--asa-ink-3);
+}
+
+/* ==========================================================================
+   CONTA — F2/F3
+   Upload de documento (Asa Express), código de verificação e o cartão de
+   plano de assinatura: os três elos que faltavam para pós-venda e conta.
+   ========================================================================== */
+
+/* Dropzone — "a maior oportunidade de coerência entre promessa e produto"
+   (§5.5): mesmo tratamento de superfície de asa-field, para não parecer um
+   componente de terceiro dentro do formulário. */
+.asa-upload__dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--asa-space-2);
+  text-align: center;
+  padding: var(--asa-space-7) var(--asa-space-4);
+  border: var(--asa-border-width) dashed var(--asa-line-strong);
+  border-radius: var(--asa-radius);
+  background: var(--asa-bg-elevated);
+}
+
+.asa-upload__dropzone .asa-icon--feature { color: var(--asa-ink-3); }
+
+.asa-upload__text { margin: 0; font-family: var(--asa-font); font-size: var(--asa-fs-body-dense); color: var(--asa-ink-2); }
+.asa-upload__hint { margin: 0; font-family: var(--asa-font); font-size: var(--asa-fs-label); color: var(--asa-ink-3); }
+
+.asa-upload[data-state="dragover"] .asa-upload__dropzone {
+  border-color: var(--asa-ink);
+  background: var(--asa-surface-hover);
+}
+
+.asa-upload[data-state="error"] .asa-upload__dropzone {
+  border-style: solid;
+  border-color: var(--asa-action-hover);
+}
+
+.asa-upload[data-state="done"] .asa-upload__dropzone {
+  border-style: solid;
+  border-color: var(--asa-ok);
+}
+
+.asa-upload__file {
+  display: flex;
+  align-items: center;
+  gap: var(--asa-space-2);
+  padding: var(--asa-space-3);
+  border: var(--asa-border-width) solid var(--asa-line);
+  border-radius: var(--asa-radius);
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  color: var(--asa-ink);
+}
+
+.asa-upload__file .asa-icon { color: var(--asa-ok); }
+
+/* Código de verificação — a decisão de "código digitado" já existia em
+   12-app-nativo.html sem componente correspondente. Cada dígito É um
+   .asa-input: herda foco, inválido e desabilitado de graça, em vez de
+   reabrir a discussão de redundância de sinal que o campo já resolveu. */
+.asa-codeinput { display: flex; gap: var(--asa-space-2); }
+
+.asa-codeinput__digit {
+  width: 44px;
+  padding: 14px 0;
+  text-align: center;
+  font-size: var(--asa-fs-title);
+  font-weight: var(--asa-weight-bold);
+}
+
+/* Plano — cartão de assinatura (COULD #23). Reaproveita asa-card + asa-price
+   (o preço segue vermelho, mesmo sinal único de T1) em vez de inventar uma
+   quarta variação de cartão de preço. */
+.asa-card-plan { display: flex; flex-direction: column; gap: var(--asa-space-4); padding: var(--asa-space-6); }
+
+.asa-card-plan--featured { border-width: 2px; border-color: var(--asa-ink); }
+
+.asa-card-plan__name {
+  margin: 0;
+  font-family: var(--asa-font-mono);
+  font-size: var(--asa-fs-label);
+  letter-spacing: var(--asa-tracking-mono);
+  text-transform: uppercase;
+  color: var(--asa-ink-3);
+}
+
+.asa-card-plan__benefits {
+  display: flex;
+  flex-direction: column;
+  gap: var(--asa-space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.asa-card-plan__benefits li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  color: var(--asa-ink-2);
+}
+
+.asa-card-plan__benefits .asa-icon {
+  width: var(--asa-icon-dense);
+  height: var(--asa-icon-dense);
+  color: var(--asa-ok);
+  margin-top: 2px;
+}
