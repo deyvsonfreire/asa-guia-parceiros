@@ -31,6 +31,7 @@ O sistema foi desenhado para eliminar ambiguidades no uso da marca, estabelecend
 13. [**12 · App Nativo**](12-app-nativo.html) — Telas mobile e microinterações táteis.
 14. [**13 · Roadmap**](13-roadmap.html) — Decisões de arquitetura e evolução do produto.
 15. [**14 · Central de Downloads**](14-downloads.html) — Todos os arquivos empacotados para download imediato.
+16. [**15 · Composição de Página**](15-composicao.html) · Como uma página inteira fica com cara de Asa: faixas, foto, ritmo e o checklist de entrega.
 
 ---
 
