@@ -1,10 +1,12 @@
 /* ==========================================================================
-   ASA RENT A CAR — GRAMÁTICA DA DOCUMENTAÇÃO
+   ASA RENT A CAR: GRAMÁTICA DA DOCUMENTAÇÃO
 
    Só o chrome do documento: capa, navegação, seção, card, glosa, vitrine.
-   Nada aqui é componente de produto — o produto está em asa-components.css.
-   A gramática (rótulo mono → título display → lead → grid de cards com
-   glosa na base) é herdada do arquivo de referência do handoff.
+   Nada aqui é componente de produto; o produto está em asa-components.css.
+   A gramática de página é "título em Registro 2 → lide → conteúdo": a
+   documentação pratica o que prescreve. A legenda acima do título, quando
+   existe, é discreta (sem vermelho, sem caixa alta) e só numera a seção.
+   Nenhuma peça do chrome usa caixa alta além do carimbo da capa.
    ========================================================================== */
 
 /* ==========================================================================
@@ -15,11 +17,10 @@
   position: sticky;
   top: 0;
   z-index: 20;
-  /* rgba(255,255,255,.94) sobre var(--asa-bg-elevated): translúcido correto
-     para o branco que é o fundo padrão do sistema (era rgba(255,247,227,.94)
-     — o creme ANTIGO, de antes da correção para #FFFBF0 — nunca atualizado
-     quando o resto do sistema corrigiu o tom; ficou um amarelo mais
-     saturado que qualquer superfície viva do sistema atual). */
+  /* rgba(255,255,255,.94) sobre var(--asa-bg-elevated): o translúcido da
+     barra parte do branco que é o fundo padrão do sistema. Nunca de um tom
+     amarelado, que leria mais saturado que qualquer superfície viva do
+     sistema. */
   background: rgba(255, 255, 255, .94);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--asa-line);
@@ -65,20 +66,19 @@
 }
 
 /* --------------------------------------------------------------------------
-   DRAWER MOBILE — revisão de 12/09/2026
-   Antes disto, abaixo de 1024px a barra inteira virava uma faixa de
-   rolagem horizontal indescobrível: a maioria das 14 páginas ficava
-   invisível sem um swipe por sorte — e contradizia a própria especificação
-   de Navegação do sistema (asa-navdrawer, já construído e documentado em
-   06-componentes.html#flutuante). Aqui, sem JS (mesma restrição de sempre):
-   um checkbox real faz o papel do botão, estilizado como hambúrguer via
-   ::before/::after, e :has() no ancestral — já um precedente do próprio
-   sistema em .asa-choice--card:has(.asa-choice__input:checked) — dispensa
-   qualquer amarração de irmão-adjacente entre o checkbox e o painel.
+   DRAWER MOBILE
+   Abaixo de 1024px a barra vira um drawer, a mesma especificação de
+   Navegação do sistema (asa-navdrawer, 06-componentes.html#flutuante): uma
+   faixa de rolagem horizontal esconderia a maioria das páginas sem um
+   swipe por sorte. Sem JS: um checkbox real faz o papel do botão,
+   estilizado como hambúrguer via ::before/::after, e :has() no ancestral
+   (o mesmo mecanismo de .asa-choice--card:has(.asa-choice__input:checked))
+   dispensa qualquer amarração de irmão-adjacente entre o checkbox e o
+   painel.
    -------------------------------------------------------------------------- */
 
 .asa-doc-nav__list {
-  display: contents; /* no desktop, os links continuam filhos diretos do flex de .asa-doc-nav__inner — zero mudança visual */
+  display: contents; /* no desktop, os links são filhos diretos do flex de .asa-doc-nav__inner, sem efeito visual */
 }
 
 .asa-doc-nav__toggle {
@@ -281,8 +281,10 @@
 
 /* ==========================================================================
    SEÇÃO
-   Ritmo de fundo alternado creme → branco → creme, com a seção escura
-   reservada para o momento de maior peso do documento.
+   Ritmo de fundo: duas seções seguidas nunca têm o mesmo fundo (mist, branco,
+   amarelo, preto), e a seção escura fica para o momento de maior peso. Uma
+   topologia por seção: a página que repete a mesma grade cinco vezes
+   ensina o leitor a parar de olhar.
    ========================================================================== */
 
 .asa-doc-section {
@@ -290,7 +292,7 @@
   border-top: 1px solid var(--asa-line-soft);
 }
 
-.asa-doc-section--cream { background: var(--asa-bg); }
+.asa-doc-section--mist { background: var(--asa-bg); }
 .asa-doc-section--white { background: var(--asa-bg-elevated); }
 .asa-doc-section--dense { background: var(--asa-bg-dense); color: var(--asa-ink-inverse); border-top-color: transparent; }
 .asa-doc-section--yellow{ background: var(--asa-surface); }
@@ -301,24 +303,24 @@
   container-type: inline-size;
 }
 
+/* Legenda de seção: discreta, caixa baixa, sem cor de ação. Existe para o
+   número da seção; onde só repete o título, a página o remove. */
 .asa-doc-section__label {
-  font-size: var(--asa-fs-label);
-  line-height: 1;
+  font-size: var(--asa-fs-body-dense);
+  line-height: var(--asa-lh-body-dense);
   font-weight: var(--asa-weight-medium);
-  letter-spacing: .24em;
-  text-transform: uppercase;
-  color: var(--asa-action-hover);
+  color: var(--asa-ink-3);
   display: block;
-  margin-bottom: 18px;
+  margin-bottom: var(--asa-space-3);
 }
 
-.asa-doc-section--dense .asa-doc-section__label { color: var(--asa-surface); }
+.asa-doc-section--dense .asa-doc-section__label { color: var(--asa-ink-inverse-2); }
 .asa-doc-section--yellow .asa-doc-section__label { color: var(--asa-ink); }
 
 .asa-doc-section h2 {
-  font-size: clamp(30px, 4.6cqi, 62px);
-  line-height: .98;
-  max-width: 1000px;
+  font-size: clamp(28px, 3.2cqi, 44px);
+  line-height: 1.1;
+  max-width: 900px;
 }
 
 .asa-doc-section__lead {
@@ -334,18 +336,16 @@
 .asa-doc-block { margin-top: clamp(36px, 5vw, 64px); }
 
 .asa-doc-block__title {
-  font-family: var(--asa-font-mono);
-  font-size: 13px;
-  line-height: 1.2;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-subtitle);
+  line-height: var(--asa-lh-subtitle);
   font-weight: var(--asa-weight-bold);
-  letter-spacing: var(--asa-tracking-mono);
-  text-transform: uppercase;
-  color: var(--asa-action-hover);
+  color: var(--asa-ink);
   display: block;
   margin-bottom: var(--asa-space-4);
 }
 
-.asa-doc-section--dense .asa-doc-block__title { color: var(--asa-surface); }
+.asa-doc-section--dense .asa-doc-block__title { color: var(--asa-ink-inverse); }
 .asa-doc-section--yellow .asa-doc-block__title { color: var(--asa-ink); }
 
 /* ==========================================================================
@@ -380,18 +380,17 @@
 
 .asa-doc-card--dense  { background: var(--asa-bg-dense); border-color: transparent; color: var(--asa-ink-inverse); }
 
-/* Achado pelo scanner em quase toda página: um <a> de conteúdo dentro de
-   seção/card --dense herda o global a:hover (--asa-action, #E80911) — 3,9:1
-   sobre #141517, reprova AA. O estado normal (--asa-action-hover) já passa;
-   só o hover mais claro falha. Mesmo precedente de --asa-label-mono--on-dark
-   e da placa de número: amarelo é o acento que este sistema já usa sobre
-   fundo escuro — 11,45:1, AAA. */
+/* Link de conteúdo dentro de seção/card --dense: o a:hover global
+   (--asa-action, #E80911) dá 3,9:1 sobre #141517 e reprova AA. O estado
+   normal (--asa-action-hover) passa; só o hover mais claro falha. Sobre
+   fundo escuro o acento do sistema é o amarelo (11,45:1, AAA), o mesmo de
+   --asa-label-mono--on-dark e da placa de número. */
 .asa-doc-section--dense a:hover,
 .asa-doc-card--dense a:hover {
   color: var(--asa-surface);
 }
 .asa-doc-card--yellow { background: var(--asa-surface); border-color: transparent; color: var(--asa-ink) !important; }
-.asa-doc-card--cream  { background: var(--asa-bg); color: var(--asa-ink); }
+.asa-doc-card--mist  { background: var(--asa-bg); color: var(--asa-ink); }
 .asa-doc-card--flush  { padding: 0; overflow: hidden; }
 
 /* Em seções dense, garante que cards claros/amarelos não herdem texto branco nem títulos amarelos */
@@ -418,8 +417,8 @@
 }
 
 /* A glosa gruda na base do card. É o que alinha o racional entre cards de
-   alturas diferentes na mesma linha. Ajustado para 15px com --asa-ink-2 para
-   leitura nítida e confortável em tela. */
+   alturas diferentes na mesma linha. 15px em --asa-ink-2, para leitura
+   nítida e confortável em tela. */
 .asa-doc-gloss {
   font-size: 15px;
   line-height: 1.6;
@@ -428,11 +427,11 @@
   max-width: none;
 }
 
-/* Bug real, achado pelo detector: um .asa-doc-block "solto" (sem classe de
-   card) dentro de .asa-doc-section--dense herdava --asa-ink-3 (feito para
-   fundo claro) sobre fundo preto — 2,7:1, reprova AA. As duas regras abaixo
-   já cobriam o caso "dentro de um card --dense/--yellow"; esta cobre o caso
-   "dentro da seção escura, mas sem card". Ordem importa: como vem ANTES das
+/* Um .asa-doc-block "solto" (sem classe de card) dentro de
+   .asa-doc-section--dense não pode herdar --asa-ink-3, feito para fundo
+   claro: sobre preto dá 2,7:1 e reprova AA. As duas regras abaixo cobrem o
+   caso "dentro de um card --dense/--yellow"; esta cobre o caso "dentro da
+   seção escura, mas sem card". Ordem importa: como vem ANTES das
    regras de card por classe (mesma especificidade), um card --dense/--yellow
    aninhado numa seção escura continua vencendo pela ordem de origem. */
 .asa-doc-section--dense .asa-doc-gloss { color: var(--asa-gray-dark-2); }
@@ -524,7 +523,7 @@
 /* ==========================================================================
    VITRINE DE COMPONENTE
    O fundo da vitrine é escolhido para provar a regra de contraste que o
-   componente documenta — não é decoração.
+   componente documenta, não para decorar.
    ========================================================================== */
 
 .asa-demo {
@@ -553,12 +552,10 @@
 }
 
 .asa-demo__caption {
-  font-family: var(--asa-font-mono);
-  font-size: 12px;
-  line-height: 1.4;
-  font-weight: var(--asa-weight-bold);
-  letter-spacing: .12em;
-  text-transform: uppercase;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  line-height: var(--asa-lh-body-dense);
+  font-weight: var(--asa-weight-medium);
   color: var(--asa-ink-2);
 }
 
@@ -569,18 +566,17 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-family: var(--asa-font-mono);
-  font-size: 13px;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  line-height: var(--asa-lh-body-dense);
   font-weight: var(--asa-weight-bold);
-  letter-spacing: .14em;
-  text-transform: uppercase;
 }
 
 .asa-verdict--yes { color: var(--asa-ok); }
 .asa-verdict--no  { color: var(--asa-action-hover); }
 
 /* ==========================================================================
-   MOLDURAS — navegador e celular
+   MOLDURAS: navegador e celular
    Usadas para apresentar telas inteiras dentro da documentação.
    ========================================================================== */
 
@@ -604,7 +600,7 @@
 
 .asa-frame__url {
   font-family: var(--asa-font-mono);
-  font-size: 10px;
+  font-size: var(--asa-fs-label); /* piso do sistema: nada abaixo de 12px */
   letter-spacing: .04em;
   color: var(--asa-ink-3);
   background: var(--asa-bg-elevated);
@@ -689,7 +685,7 @@
 }
 
 /* Mockup, não navegação real: os itens são spans ilustrativos, então o
-   estado ativo não usa aria-current — senão o leitor de tela anunciaria
+   estado ativo não usa aria-current; senão o leitor de tela anunciaria
    várias "páginas atuais" na mesma página de documentação. */
 .asa-phone__tab[data-active] { color: var(--asa-action-hover); }
 
@@ -714,20 +710,16 @@
 }
 
 .asa-doc-next__link span {
-  font-family: var(--asa-font-mono);
-  font-size: var(--asa-fs-label); /* era 10px — abaixo do piso de 12px, achado pelo detector; é link real, não rótulo decorativo */
-  letter-spacing: .14em;
-  text-transform: uppercase;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
+  line-height: var(--asa-lh-body-dense);
   color: var(--asa-ink-3);
 }
 
 .asa-doc-next__link b {
-  font-size: 20px;
-  line-height: 1.2;
-  font-weight: var(--asa-weight-black);
-  font-style: italic;
-  text-transform: uppercase;
-  letter-spacing: var(--asa-tracking-display);
+  font-size: var(--asa-fs-highlight);
+  line-height: var(--asa-lh-highlight);
+  font-weight: var(--asa-weight-bold);
   color: var(--asa-action-hover);
 }
 
@@ -752,7 +744,7 @@
 }
 
 /* ==========================================================================
-   TABELA (só na documentação — o produto não usa tabela)
+   TABELA (só na documentação: o produto não usa tabela)
    ========================================================================== */
 
 .asa-doc-table {
@@ -771,12 +763,10 @@
 }
 
 .asa-doc-table th {
-  font-family: var(--asa-font-mono);
-  font-size: 12px;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense);
   font-weight: var(--asa-weight-bold);
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--asa-ink-2);
+  color: var(--asa-ink);
   white-space: nowrap;
 }
 
@@ -863,10 +853,9 @@
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
-  font-family: var(--asa-font-mono, monospace);
-  font-size: 12px;
-  letter-spacing: .08em;
-  text-transform: uppercase;
+  font-family: var(--asa-font);
+  font-size: var(--asa-fs-body-dense, 14px);
+  line-height: var(--asa-lh-body-dense, 20px);
   color: var(--asa-ink-2, #4A4C50);
   margin-top: 6px;
 }
